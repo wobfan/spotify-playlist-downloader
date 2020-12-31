@@ -192,7 +192,7 @@ def main():
 
         print("\nlog: user settings saved successfully\n")
 
-        print("You will be redirected to login into you Spotify account on web browser. After successful login you just need to copy the whole `http://localhost/?code=...` URL from your browser and paste it to this console.")
+        print("You will be redirected to login into your Spotify account on your web browser. After successful login you just need to copy the whole `http://localhost/?code=...` URL from your browser and paste it to this console.")
 
     scope = 'playlist-read playlist-read-private'
     token = util.prompt_for_user_token(variables['USERNAME'], scope)
