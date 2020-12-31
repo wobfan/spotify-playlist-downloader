@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import unicode_literals
+
 import os
 import re
 import csv
@@ -18,29 +18,29 @@ def get_songs_from_csvfile(csvfile, args):
         reader = csv.reader(csvfile)
         next(reader)  # Skip the first line
         if args.skip:
-            print 'Skipping', args.skip, 'songs'
+            print('Skipping', args.skip, 'songs')
             for i in range(args.skip):
                 next(reader)
         for row in reader:
             songs.append({
-                'name': unidecode(unicode(row[0], "utf-8")).strip(),
-                'artist': unidecode(unicode(row[1], "utf-8")).strip(),
-                'album': unidecode(unicode(row[2], "utf-8")).strip()
+                'name': unidecode(row[0]).strip(),
+                'artist': unidecode(row[1]).strip(),
+                'album': unidecode(row[2]).strip()
             })
     return songs
 
 
 def get_environment_variables():
-    if not os.path.isfile('login.json'):
+    if not os.path.isfile('.login.json'):
         return {}
-    with open('login.json') as jsonfile:
+    with open('.login.json') as jsonfile:
         variables = json.load(jsonfile)
     return variables
 
 
 def save_environment_variables(variables):
     variables['SPOTIPY_REDIRECT_URI'] = 'http://localhost/'
-    with open('login.json', 'w+') as jsonfile:
+    with open('.login.json', 'w+') as jsonfile:
         json.dump(variables, jsonfile)
 
 
@@ -57,8 +57,8 @@ class MyLogger(object):
 
 def download_finish(d):
     if d['status'] == 'finished':
-        print '\x1b[1A\x1b[2K'
-        print "\x1b[1A[\033[93mConverting\033[00m] %s" % d['filename']
+        print('\x1b[1A\x1b[2K')
+        print("\x1b[1A[\033[93mConverting\033[00m] %s" % d['filename'])
 
 
 def download_songs(songs, folder):
@@ -67,8 +67,8 @@ def download_songs(songs, folder):
             song['artist'] + '.mp3'
         if os.path.isfile(probable_filename):
             # The file may already be there, so skip
-            print '[\033[93mSkipping\033[00m] %s by %s' % \
-                (song['name'], song['artist'])
+            print('[\033[93mSkipping\033[00m] %s by %s' % \
+                (song['name'], song['artist']))
             continue
         opts = {
             'format': 'bestaudio/best',
@@ -85,22 +85,22 @@ def download_songs(songs, folder):
         }
         url = ' '.join([song['name'], song['artist'], 'audio', 'youtube'])
         url = 'ytsearch:' + url
-        print '[\033[91mFetching\033[00m] %s' % probable_filename
+        print('[\033[91mFetching\033[00m] %s' % probable_filename)
         with youtube_dl.YoutubeDL(opts) as ydl:
             ydl.download([url])
         if os.path.isfile(probable_filename):
             afile = eyed3.load(probable_filename)
-            afile.tag.title = unicode(song['name'], "utf-8")
-            afile.tag.artist = unicode(song['artist'], "utf-8")
-            afile.tag.album = unicode(song['album'], "utf-8")
+            afile.tag.title = song['name']
+            afile.tag.artist = song['artist']
+            afile.tag.album = song['album']
             afile.tag.save()
         else:
-            print '\x1b[1A\x1b[2K'
-            print '\x1b[1A[\033[91mMetadata\033[00m] Could not set metadata for %s\nTemp' % \
-                probable_filename
+            print('\x1b[1A\x1b[2K')
+            print('\x1b[1A[\033[91mMetadata\033[00m] Could not set metadata for %s\nTemp' % \
+                probable_filename)
 
-        print '\x1b[1A\x1b[2K'
-        print '\x1b[1A[\033[92mDownloaded]\033[00m', song['name'], '-', song['artist']
+        print('\x1b[1A\x1b[2K')
+        print('\x1b[1A[\033[92mDownloaded]\033[00m', song['name'], '-', song['artist'])
 
 
 def get_songs_from_playlist(tracks, args):
@@ -146,12 +146,12 @@ def main():
                 os.makedirs(args.folder)
                 folder = os.path.abspath(args.folder)
             except e:
-                print 'Error while creating folder'
+                print('Error while creating folder')
                 raise
         else:
-            print 'No such folder. Aborting..'
+            print('No such folder. Aborting..')
             exit()
-        print 'Storing files in', folder
+        print('Storing files in', folder)
 
     if args.csv:
         if os.path.isfile(args.csv):
@@ -159,14 +159,14 @@ def main():
             songs = get_songs_from_csvfile(csvfile, args)
             download_songs(songs, folder)
         else:
-            print 'No such csv file. Aborting..'
+            print('No such csv file. Aborting..')
             exit()
 
     if args.reset:
         path = os.path.dirname(os.path.abspath(__file__))
 
         purge(path, '\.cache-.*')
-        purge(path, 'login.json')
+        purge(path, '.login.json')
         
         print("'-r': successfully removed stored login data.")
 
@@ -175,7 +175,7 @@ def main():
 
     variables = get_environment_variables()
     if variables == {}:
-        print("log: could not read valid variables from login.json\n")
+        print("log: could not read valid variables from .login.json\n")
         print("Need to set new login data. for this, a Client-ID, Client-Secret and your Spotify username is needed.")
         print("To do this, you need to do the following steps:\n")
         print("\t1. Login to https://developer.spotify.com/dashboard/applications")
@@ -185,9 +185,9 @@ def main():
         print("\t5. Under 'Redirect URIs', add 'http://localhost/' and click 'Add', then 'Save'.")
         print("\t6. Click on 'Show Client Secret'.")
         print("\t7. Copy and paste the ID and the secret here.\n")
-        variables['SPOTIPY_CLIENT_ID'] = raw_input("Client-ID: ")
-        variables['SPOTIPY_CLIENT_SECRET'] = raw_input("Client-Secret: ")
-        variables['USERNAME'] = raw_input("Your Spotify-Username: ")
+        variables['SPOTIPY_CLIENT_ID'] = input("Client-ID: ")
+        variables['SPOTIPY_CLIENT_SECRET'] = input("Client-Secret: ")
+        variables['USERNAME'] = input("Your Spotify-Username: ")
         save_environment_variables(variables)
 
         print("\nlog: user settings saved successfully\n")
@@ -201,22 +201,22 @@ def main():
         try:
             playlists = sp.user_playlists(variables['USERNAME'])
         except spotipy.client.SpotifyException:
-            print "Invalid Username"
+            print("Invalid Username")
             exit()
         if len(playlists) > 0:
-            print("All your Playlists: ")
+            print("\nAll your Playlists: ")
             for index, playlist in enumerate(playlists['items']):
-                print str(index + 1) + ": " + playlist['name']
-            n = raw_input("Enter numbers of playlists you want to download (e.g. '4' or '4,7,8'): ").split(",")
+                print(str(index + 1) + ": " + playlist['name'])
+            n = input("Enter numbers of playlists you want to download (e.g. '4' or '4,7,8'): ").split(",")
             if n:
-                for i in xrange(0, len(n), 2):
+                for i in range(0, len(n), 2):
                     playlist_folder = folder+"/"+playlists['items'][int(n[i]) - 1]['name']
-                    print 'Storing files in', playlist_folder
+                    print('Storing files in', playlist_folder)
                     if not os.path.isdir(playlist_folder):
                         try:
                             os.makedirs(playlist_folder )
                         except e:
-                            print 'Error while creating folder'
+                            print('Error while creating folder')
                             raise
                     playlist_id = playlists['items'][int(n[i]) - 1]['id']
                     tracks = sp.user_playlist(variables['USERNAME'], playlist_id,
@@ -224,11 +224,11 @@ def main():
                     songs = get_songs_from_playlist(tracks, args)
                     download_songs(songs, playlist_folder )
             else:
-                print "No numbers provided! Aborting..."
+                print("No numbers provided! Aborting...")
         else:
-            print "No playlist found!"
+            print("No playlist found!")
     else:
-        print "Can't get token for", variables['USERNAME']
+        print("Can't get token for", variables['USERNAME'])
         exit()
 
 
