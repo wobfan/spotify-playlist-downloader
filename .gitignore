@@ -94,3 +94,5 @@ ENV/
 .cache*
 login.json
 
+*.mp3
+*.webm
