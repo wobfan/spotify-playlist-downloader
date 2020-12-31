@@ -89,3 +89,8 @@ ENV/
 .ropeproject
 
 .tags
+
+.vscode
+.cache*
+login.json
+

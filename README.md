@@ -8,12 +8,12 @@ Download your Spotify playlists using simple python script
 
 
 ### Installation
-Works only with [Python 2.7](https://www.python.org/downloads/release/python-2717/). Currently working on a new version for Python 3.
+Works with [Python 3](https://www.python.org/downloads/).
 
 ### Downloading playlist
 
-* Usage: `python2 download.py`
-* For usage information: `python2 download.py -h`
+* Usage: `python download.py`
+* For usage information: `python download.py -h`
 
 1. Download through User Login
     * Login to your Spotify account and create a [Spotify Application](https://developer.spotify.com/my-applications/#!/applications)
@@ -29,7 +29,7 @@ Works only with [Python 2.7](https://www.python.org/downloads/release/python-271
         6. Click on 'Show Client Secret'.
         7. Copy and paste the ID and the secret here.
 
-        * You will be redirected to login into you Spotify account on web browser. After successful login you just need to copy the whole `http://localhost/?code=...` URL from your browser and paste it to the console where your script is running.
+        * You will be redirected to login into your Spotify account on your default web browser. After successful login you just need to copy the whole `http://localhost/?code=...` URL from your browser and paste it to the console where your script is running.
     * In case your Spotify account is linked with your facebook account, use your device username in the `username` argument for the script and use your device password to log in to spotify in the browser window that opens.
 
 2. Download through CSV File
