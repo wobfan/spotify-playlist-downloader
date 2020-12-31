@@ -1,4 +1,4 @@
 unidecode
-eyed3==0.8.12
+eyed3
 youtube_dl
 spotipy
