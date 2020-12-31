@@ -204,7 +204,7 @@ def main():
             print "Invalid Username"
             exit()
         if len(playlists) > 0:
-            print("All your Playlists: ")
+            print("\nAll your Playlists: ")
             for index, playlist in enumerate(playlists['items']):
                 print str(index + 1) + ": " + playlist['name']
             n = raw_input("Enter numbers of playlists you want to download (e.g. '4' or '4,7,8'): ").split(",")
