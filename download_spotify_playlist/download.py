@@ -125,7 +125,7 @@ def main():
             except e:
                 print 'Error while creating folder'
                 raise
-        else:
+        esudo lse:
             print 'No such folder. Aborting..'
             exit()
         print 'Storing files in', folder
