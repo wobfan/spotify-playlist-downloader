@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 from __future__ import unicode_literals
 import os
+import re
 import csv
+import json
 import eyed3
 import argparse
 import youtube_dl
@@ -26,6 +28,20 @@ def get_songs_from_csvfile(csvfile, args):
                 'album': unidecode(unicode(row[2], "utf-8")).strip()
             })
     return songs
+
+
+def get_environment_variables():
+    if not os.path.isfile('login.json'):
+        return {}
+    with open('login.json') as jsonfile:
+        variables = json.load(jsonfile)
+    return variables
+
+
+def save_environment_variables(variables):
+    variables['SPOTIPY_REDIRECT_URI'] = 'http://localhost/'
+    with open('login.json', 'w+') as jsonfile:
+        json.dump(variables, jsonfile)
 
 
 class MyLogger(object):
@@ -99,16 +115,23 @@ def get_songs_from_playlist(tracks, args):
     return songs
 
 
+#https://stackoverflow.com/a/1548720/7195897
+def purge(dir, pattern):
+    for f in os.listdir(dir):
+        if re.search(pattern, f):
+            os.remove(os.path.join(dir, f))
+
+
 def main():
+
     parser = argparse.ArgumentParser()
+    parser.add_argument('-r', '--reset', help="removed all stored login data", action='store_true')
     parser.add_argument('-f', '--folder', help="keep the files in the folder specified")
     parser.add_argument('-c', '--create', help="try to create folder if doesn't exist",
                         action="store_true")
     parser.add_argument('--skip', help="number of songs to skip from the start of csv",
                         type=int)
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument('-csv', help="input csv file")
-    group.add_argument('-username', help="username of your spotify account")
+    parser.add_argument('-csv', help="input csv file")
 
     args = parser.parse_args()
 
@@ -129,6 +152,7 @@ def main():
             print 'No such folder. Aborting..'
             exit()
         print 'Storing files in', folder
+
     if args.csv:
         if os.path.isfile(args.csv):
             csvfile = args.csv
@@ -138,45 +162,72 @@ def main():
             print 'No such csv file. Aborting..'
             exit()
 
-    if args.username:
-        scope = 'playlist-read playlist-read-private'
-        token = util.prompt_for_user_token(args.username, scope)
-        if token:
-            sp = spotipy.Spotify(auth=token)
-            try:
-                playlists = sp.user_playlists(args.username)
-            except spotipy.client.SpotifyException:
-                print "Invalid Username"
-                exit()
-            if len(playlists) > 0:
-                print "All Playlists: "
-                for index, playlist in enumerate(playlists['items']):
-                    print str(index + 1) + ": " + playlist['name']
-                n = raw_input("Enter S.N. of playlists (seprated by comma): ").split(",")
-                if n:
-                    for i in xrange(0, len(n), 2):
-                       playlist_folder = folder+"/"+playlists['items'][int(n[i]) - 1]['name']
-                       print 'Storing files in', playlist_folder
-                       if not os.path.isdir(playlist_folder):
-                            try:
-                                os.makedirs(playlist_folder )
-                            except e:
-                                print 'Error while creating folder'
-                                raise
-                       playlist_id = playlists['items'][int(n[i]) - 1]['id']
-                       tracks = sp.user_playlist(args.username, playlist_id,
-                                                  fields="tracks,next")['tracks']
-                       songs = get_songs_from_playlist(tracks, args)
-                       download_songs(songs, playlist_folder )
-                else:
-                    print "No S.N. Provided! Aborting..."
-            else:
-                print "No Playlist Found!"
-        else:
-            print "Can't get token for", username
-            exit()
+    if args.reset:
+        path = os.path.dirname(os.path.abspath(__file__))
+
+        purge(path, '\.cache-.*')
+        purge(path, 'login.json')
+        
+        print("'-r': successfully removed stored login data.")
+
     else:
         parser.print_help()
+
+    variables = get_environment_variables()
+    if variables == {}:
+        print("log: could not read valid variables from login.json\n")
+        print("Need to set new login data. for this, a Client-ID, Client-Secret and your Spotify username is needed.")
+        print("To do this, you need to do the following steps:\n")
+        print("\t1. Login to https://developer.spotify.com/dashboard/applications")
+        print("\t2. Click on 'Create an App' and enter a name and description for it. Both don't matter after they're set.")
+        print("\t3. Enable both checkboxes on the bottom of the prompt and click 'Create'.")
+        print("\t4. Click in 'Edit Settings'.")
+        print("\t5. Under 'Redirect URIs', add 'http://localhost/' and click 'Add', then 'Save'.")
+        print("\t6. Click on 'Show Client Secret'.")
+        print("\t7. Copy and paste the ID and the secret here.\n")
+        variables['SPOTIPY_CLIENT_ID'] = raw_input("Client-ID: ")
+        variables['SPOTIPY_CLIENT_SECRET'] = raw_input("Client-Secret: ")
+        variables['USERNAME'] = raw_input("Your Spotify-Username: ")
+        save_environment_variables(variables)
+
+        print("\nlog: user settings saved successfully\n")
+
+    scope = 'playlist-read playlist-read-private'
+    token = util.prompt_for_user_token(variables['USERNAME'], scope)
+    if token:
+        sp = spotipy.Spotify(auth=token)
+        try:
+            playlists = sp.user_playlists(variables['USERNAME'])
+        except spotipy.client.SpotifyException:
+            print "Invalid Username"
+            exit()
+        if len(playlists) > 0:
+            print "All your Playlists: "
+            for index, playlist in enumerate(playlists['items']):
+                print str(index + 1) + ": " + playlist['name']
+            n = raw_input("Enter numbers of playlists you want to download (e.g. '4' or '4,7,8'): ").split(",")
+            if n:
+                for i in xrange(0, len(n), 2):
+                    playlist_folder = folder+"/"+playlists['items'][int(n[i]) - 1]['name']
+                    print 'Storing files in', playlist_folder
+                    if not os.path.isdir(playlist_folder):
+                        try:
+                            os.makedirs(playlist_folder )
+                        except e:
+                            print 'Error while creating folder'
+                            raise
+                    playlist_id = playlists['items'][int(n[i]) - 1]['id']
+                    tracks = sp.user_playlist(variables['USERNAME'], playlist_id,
+                                                fields="tracks,next")['tracks']
+                    songs = get_songs_from_playlist(tracks, args)
+                    download_songs(songs, playlist_folder )
+            else:
+                print "No S.N. Provided! Aborting..."
+        else:
+            print "No Playlist found!"
+    else:
+        print "Can't get token for", variables['USERNAME']
+        exit()
 
 
 if __name__ == '__main__':
