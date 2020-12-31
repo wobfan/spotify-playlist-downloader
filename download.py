@@ -170,9 +170,6 @@ def main():
         
         print("'-r': successfully removed stored login data.")
 
-    else:
-        parser.print_help()
-
     variables = get_environment_variables()
     if variables == {}:
         print("log: could not read valid variables from .login.json\n")
