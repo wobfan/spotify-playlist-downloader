@@ -192,6 +192,8 @@ def main():
 
         print("\nlog: user settings saved successfully\n")
 
+        print("You will be redirected to login into you Spotify account on web browser. After successful login you just need to copy the whole `http://localhost/?code=...` URL from your browser and paste it to this console.")
+
     scope = 'playlist-read playlist-read-private'
     token = util.prompt_for_user_token(variables['USERNAME'], scope)
     if token:
@@ -202,7 +204,7 @@ def main():
             print "Invalid Username"
             exit()
         if len(playlists) > 0:
-            print "All your Playlists: "
+            print("All your Playlists: ")
             for index, playlist in enumerate(playlists['items']):
                 print str(index + 1) + ": " + playlist['name']
             n = raw_input("Enter numbers of playlists you want to download (e.g. '4' or '4,7,8'): ").split(",")
@@ -222,9 +224,9 @@ def main():
                     songs = get_songs_from_playlist(tracks, args)
                     download_songs(songs, playlist_folder )
             else:
-                print "No S.N. Provided! Aborting..."
+                print "No numbers provided! Aborting..."
         else:
-            print "No Playlist found!"
+            print "No playlist found!"
     else:
         print "Can't get token for", variables['USERNAME']
         exit()
