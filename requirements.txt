@@ -1,0 +1,3 @@
+eyed3==0.8.12
+youtube_dl
+spotipy
