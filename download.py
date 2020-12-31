@@ -125,7 +125,7 @@ def purge(dir, pattern):
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-r', '--reset', help="removed all stored login data", action='store_true')
+    parser.add_argument('-r', '--reset', help="remove all stored login data", action='store_true')
     parser.add_argument('-f', '--folder', help="keep the files in the folder specified")
     parser.add_argument('-c', '--create', help="try to create folder if doesn't exist",
                         action="store_true")
