@@ -39,7 +39,6 @@ def get_environment_variables():
 
 
 def save_environment_variables(variables):
-    variables['SPOTIPY_REDIRECT_URI'] = 'http://localhost/'
     with open('.login.json', 'w+') as jsonfile:
         json.dump(variables, jsonfile)
 
@@ -184,12 +183,17 @@ def main():
         print("\t7. Copy and paste the ID and the secret here.\n")
         variables['SPOTIPY_CLIENT_ID'] = input("Client-ID: ")
         variables['SPOTIPY_CLIENT_SECRET'] = input("Client-Secret: ")
+        variables['SPOTIPY_REDIRECT_URI'] = 'http://localhost/'
         variables['USERNAME'] = input("Your Spotify-Username: ")
         save_environment_variables(variables)
 
         print("\nlog: user settings saved successfully\n")
 
         print("You will be redirected to login into your Spotify account on your web browser. After successful login you just need to copy the whole `http://localhost/?code=...` URL from your browser and paste it to this console.")
+
+    for name in variables.keys():
+        if name != 'USERNAME':
+            os.environ[name] = variables[name]
 
     scope = 'playlist-read playlist-read-private'
     token = util.prompt_for_user_token(variables['USERNAME'], scope)
