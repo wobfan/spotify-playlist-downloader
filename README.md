@@ -9,8 +9,10 @@ This script can read your playlists through a Spotify Developer Application and 
 
 
 ### Requirements
-Apart from the Python requirements that are described in the Installation chapter, `ffmpeg` needs to be installed on your system, if you're using Linux.
-A regular installation is recommended, but it also possible to [download the binaries](https://johnvansickle.com/ffmpeg/ and extract them into the same folder where spotify-playlist-downloader is located.
+Apart from the Python requirements that are described in the Installation chapter, `ffmpeg` needs to be installed on your system.
+It can be downloaded [here](https://ffmpeg.org/download.html).
+
+It's already included in the Windows releases.
 
 
 ### Installation
