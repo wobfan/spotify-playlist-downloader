@@ -8,6 +8,11 @@ This script can read your playlists through a Spotify Developer Application and 
 * Download only the songs it didn't already download
 
 
+### Requirements
+Apart from the Python requirements that are described in the Installation chapter, `ffmpeg` needs to be installed on your system, if you're using Linux.
+A regular installation is recommended, but it also possible to [download the binaries](https://johnvansickle.com/ffmpeg/ and extract them into the same folder where spotify-playlist-downloader is located.
+
+
 ### Installation
 Works with [Python 3](https://www.python.org/downloads/).
 
